@@ -1,0 +1,4 @@
+name: EtcdBungee
+main: com.exorath.etcdbungee.EtcdBungee
+version: 1
+author: Toon Sevrin
