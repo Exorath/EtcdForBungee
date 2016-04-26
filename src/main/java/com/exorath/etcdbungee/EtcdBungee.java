@@ -1,5 +1,6 @@
 package com.exorath.etcdbungee;
 
+import net.md_5.bungee.api.config.ListenerInfo;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
@@ -9,7 +10,7 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Created by twan1 on 4/24/2016.
+ * Created by Toon Sevrin on 4/24/2016.
  */
 public class EtcdBungee extends Plugin {
     private static EtcdBungee instance;
@@ -19,10 +20,14 @@ public class EtcdBungee extends Plugin {
 
     @Override
     public void onEnable() {
+        ListenerInfo listener = getProxy().getConfigurationAdapter().getListeners().iterator().next();
+        getProxy().setConfigurationAdapter(new ConfigAdapter());
+        getProxy().getConfigurationAdapter().getListeners().add(listener);
+
         instance = this;
         loadConfig();
-        serviceRequestHandler = ServiceRequestHandler.create();
         serviceResponseHandler = ServiceResponseHandler.create();
+        serviceRequestHandler = ServiceRequestHandler.create();
     }
 
     private void loadConfig() {
@@ -38,9 +43,12 @@ public class EtcdBungee extends Plugin {
             ConfigurationProvider.getProvider(YamlConfiguration.class).save(configuration, getConfigFile());
         }
     }
-    private File getConfigFile() {
+
+    private File getConfigFile() throws IOException {
         getDataFolder().mkdirs();
-        return new File(getDataFolder(), "config.yml");
+        File file = new File(getDataFolder(), "config.yml");
+        file.createNewFile();
+        return file;
     }
 
     public ServiceRequestHandler getServiceRequestHandler() {

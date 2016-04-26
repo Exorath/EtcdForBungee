@@ -9,14 +9,16 @@ import java.util.concurrent.TimeUnit;
  */
 public interface ServiceRequestHandler extends Runnable {
     int DEFAULT_INTERVAL_IN_MILLIS = 1000;
+
     int getIntervalInMilliseconds();
+
     void run();
 
-    static ServiceRequestHandler create(){
+    static ServiceRequestHandler create() {
         ServiceRequestHandler serviceRequestHandler = new ServiceRequestHandlerImpl();
-        ProxyServer.getInstance().getScheduler().schedule(EtcdBungee.getInstance(), () -> {
 
-        }, 0, serviceRequestHandler.getIntervalInMilliseconds(), TimeUnit.MILLISECONDS);
+        ProxyServer.getInstance().getScheduler().schedule(EtcdBungee.getInstance(), serviceRequestHandler,
+                0, serviceRequestHandler.getIntervalInMilliseconds(), TimeUnit.MILLISECONDS);
 
         return serviceRequestHandler;
     }

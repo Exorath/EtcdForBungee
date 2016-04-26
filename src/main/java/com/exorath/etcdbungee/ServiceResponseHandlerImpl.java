@@ -6,25 +6,22 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.md_5.bungee.api.ProxyServer;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
 
 /**
- * Created by twan1 on 4/25/2016.
+ * Created by Toon Sevrin on 4/25/2016.
  */
 public class ServiceResponseHandlerImpl implements ServiceResponseHandler {
-    private List<Integer> ports;
+    private List<MCService> services = new ArrayList<>();
 
     @Override
     public void onResponse(String body) {
         JsonObject obj = getDirsRecursive(body);
         if (!obj.has("node") || !obj.get("node").getAsJsonObject().has("nodes"))
             return;
-        ports = new ArrayList<>();
+        services.clear();
         handleAllDirs(obj);
         updateBungee();
     }
@@ -43,29 +40,32 @@ public class ServiceResponseHandlerImpl implements ServiceResponseHandler {
     }
 
     private void handleServiceNode(JsonObject node) {
-        if (node.get("key").getAsString().endsWith("25565") && node.get("value").getAsString().contains(":")) {
+        MCService service = MCService.getService(node.get("key").getAsString(), node.get("value").getAsString());
+        if (service != null)
+            services.add(service);
+    }
+
+    private void updateBungee() {
+
+        ProxyServer.getInstance().getConfigurationAdapter().getListeners().forEach(l -> l.getServerPriority().clear());
+        ProxyServer.getInstance().getServers().clear();
+        System.out.println("PRIORITIES -V1:");
+        ProxyServer.getInstance().getConfigurationAdapter().getListeners().forEach(s -> s.getServerPriority().forEach(p -> System.out.println(p)));
+        for (MCService service : services) {
+            String name = service.getName();
             try {
-                ports.add(Integer.valueOf(node.get("value").getAsString().split(":")[1]));
+                System.out.print("Found server: " + name + ", adding it...");
+                ProxyServer.getInstance().getServers().put(name, ProxyServer.getInstance().constructServerInfo(name, service.getAddress(), "", false));
+                ProxyServer.getInstance().getConfigurationAdapter().getListeners().forEach(l -> {l.getServerPriority().add(name); System.out.println("Listener: " + l.getHost().getPort());});
+                System.out.println(" Added!");
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-    }
-
-    private void updateBungee() {
-        ProxyServer.getInstance().getServers().clear();
-        for (int port : ports) {
-            try {
-                ProxyServer.getInstance().getServers().put(getName(port), ProxyServer.getInstance().constructServerInfo(
-                        getName(port), new InetSocketAddress(InetAddress.getLocalHost(), port), "", false));
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private static String getName(int port) {
-        return "MC-" + port;
+        System.out.println("SERVERS:");
+        ProxyServer.getInstance().getServers().values().forEach(s -> System.out.println(s.getAddress().getHostName() + ":" + s.getAddress().getPort()));
+        System.out.println("PRIORITIES:");
+        ProxyServer.getInstance().getConfigurationAdapter().getListeners().forEach(s -> s.getServerPriority().forEach(p -> System.out.println(p)));
     }
 
     private static JsonObject getDirsRecursive(String body) {
