@@ -1,4 +1,6 @@
-package com.exorath.etcdbungee;
+package com.exorath.etcdbungee.api;
+
+import com.exorath.etcdbungee.impl.ServiceResponseHandlerImpl;
 
 /**
  * Created by Toon Sevrin on 4/25/2016.

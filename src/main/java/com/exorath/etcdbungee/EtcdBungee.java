@@ -1,6 +1,9 @@
 package com.exorath.etcdbungee;
 
-import net.md_5.bungee.api.config.ListenerInfo;
+import com.exorath.etcdbungee.api.ServiceRegistry;
+import com.exorath.etcdbungee.api.ServiceRequestHandler;
+import com.exorath.etcdbungee.api.ServiceResponseHandler;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
@@ -17,17 +20,17 @@ public class EtcdBungee extends Plugin {
     private Configuration configuration;
     private ServiceRequestHandler serviceRequestHandler;
     private ServiceResponseHandler serviceResponseHandler;
+    private ServiceRegistry registry;
 
     @Override
     public void onEnable() {
-        ListenerInfo listener = getProxy().getConfigurationAdapter().getListeners().iterator().next();
-        getProxy().setConfigurationAdapter(new ConfigAdapter());
-        getProxy().getConfigurationAdapter().getListeners().add(listener);
 
         instance = this;
         loadConfig();
         serviceResponseHandler = ServiceResponseHandler.create();
         serviceRequestHandler = ServiceRequestHandler.create();
+        registry = ServiceRegistry.create();
+        ProxyServer.getInstance().getPluginManager().registerListener(this,new JoinHandler());
     }
 
     private void loadConfig() {
@@ -57,6 +60,10 @@ public class EtcdBungee extends Plugin {
 
     public ServiceResponseHandler getServiceResponseHandler() {
         return serviceResponseHandler;
+    }
+
+    public ServiceRegistry getRegistry() {
+        return registry;
     }
 
     public Configuration getConfiguration() {

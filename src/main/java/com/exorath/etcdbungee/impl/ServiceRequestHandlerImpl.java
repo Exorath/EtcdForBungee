@@ -1,5 +1,7 @@
-package com.exorath.etcdbungee;
+package com.exorath.etcdbungee.impl;
 
+import com.exorath.etcdbungee.EtcdBungee;
+import com.exorath.etcdbungee.api.ServiceRequestHandler;
 import com.github.kevinsawicki.http.HttpRequest;
 
 import java.net.MalformedURLException;

@@ -1,10 +1,14 @@
-package com.exorath.etcdbungee;
+package com.exorath.etcdbungee.impl;
 
+import com.exorath.etcdbungee.EtcdBungee;
+import com.exorath.etcdbungee.MCService;
+import com.exorath.etcdbungee.api.ServiceResponseHandler;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.config.ServerInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,26 +50,20 @@ public class ServiceResponseHandlerImpl implements ServiceResponseHandler {
     }
 
     private void updateBungee() {
-
-        ProxyServer.getInstance().getConfigurationAdapter().getListeners().forEach(l -> l.getServerPriority().clear());
         ProxyServer.getInstance().getServers().clear();
-        System.out.println("PRIORITIES -V1:");
-        ProxyServer.getInstance().getConfigurationAdapter().getListeners().forEach(s -> s.getServerPriority().forEach(p -> System.out.println(p)));
+        EtcdBungee.getInstance().getRegistry().clearServices();
         for (MCService service : services) {
-            String name = service.getName();
             try {
-                System.out.print("Found server: " + name + ", adding it...");
-                ProxyServer.getInstance().getServers().put(name, ProxyServer.getInstance().constructServerInfo(name, service.getAddress(), "", false));
-                ProxyServer.getInstance().getConfigurationAdapter().getListeners().forEach(l -> {l.getServerPriority().add(name); System.out.println("Listener: " + l.getHost().getPort());});
-                System.out.println(" Added!");
+                ServerInfo info = ProxyServer.getInstance().constructServerInfo(service.getName(), service.getAddress(), "", false);
+                service.setServerInfo(info);
+                ProxyServer.getInstance().getServers().put(info.getName(), info);
+                EtcdBungee.getInstance().getRegistry().addService(service);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
         System.out.println("SERVERS:");
         ProxyServer.getInstance().getServers().values().forEach(s -> System.out.println(s.getAddress().getHostName() + ":" + s.getAddress().getPort()));
-        System.out.println("PRIORITIES:");
-        ProxyServer.getInstance().getConfigurationAdapter().getListeners().forEach(s -> s.getServerPriority().forEach(p -> System.out.println(p)));
     }
 
     private static JsonObject getDirsRecursive(String body) {

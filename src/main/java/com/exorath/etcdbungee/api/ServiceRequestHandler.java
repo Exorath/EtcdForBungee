@@ -1,5 +1,7 @@
-package com.exorath.etcdbungee;
+package com.exorath.etcdbungee.api;
 
+import com.exorath.etcdbungee.EtcdBungee;
+import com.exorath.etcdbungee.impl.ServiceRequestHandlerImpl;
 import net.md_5.bungee.api.ProxyServer;
 
 import java.util.concurrent.TimeUnit;

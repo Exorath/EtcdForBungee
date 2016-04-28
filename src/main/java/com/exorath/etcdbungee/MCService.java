@@ -1,6 +1,8 @@
 package com.exorath.etcdbungee;
 
 
+import net.md_5.bungee.api.config.ServerInfo;
+
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
@@ -16,12 +18,22 @@ public class MCService {
 
     private InetSocketAddress address;
 
+    private ServerInfo serverInfo;
+
     public MCService(String imageName, String hostName, String containerName, int publicPort) {
         this.imageName = imageName;
         this.hostName = hostName;
         this.containerName = containerName;
         this.publicPort = publicPort;
         address = new InetSocketAddress(InetAddress.getLoopbackAddress(), publicPort);
+    }
+
+    public void setServerInfo(ServerInfo serverInfo){
+        this.serverInfo = serverInfo;
+    }
+
+    public ServerInfo getServerInfo() {
+        return serverInfo;
     }
 
     public static MCService getService(String key, String value) {
