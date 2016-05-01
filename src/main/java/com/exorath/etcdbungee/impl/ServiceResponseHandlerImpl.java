@@ -32,8 +32,9 @@ public class ServiceResponseHandlerImpl implements ServiceResponseHandler {
 
     private void handleAllDirs(JsonObject obj) {
         for (JsonElement dirNode : obj.get("node").getAsJsonObject().get("nodes").getAsJsonArray())
-            if (dirNode.isJsonObject() && dirNode.getAsJsonObject().has("nodes"))
-                handleServiceNodes(dirNode.getAsJsonObject().get("nodes").getAsJsonArray());
+            if (dirNode.isJsonObject() && dirNode.getAsJsonObject().has("nodes") && dirNode.getAsJsonObject().has("key"))
+                if (areServicesAllowedByConfig(dirNode.getAsJsonObject().get("key").getAsString()))
+                    handleServiceNodes(dirNode.getAsJsonObject().get("nodes").getAsJsonArray());
     }
 
     private void handleServiceNodes(JsonArray nodes) {
@@ -47,6 +48,13 @@ public class ServiceResponseHandlerImpl implements ServiceResponseHandler {
         MCService service = MCService.getService(node.get("key").getAsString(), node.get("value").getAsString());
         if (service != null)
             services.add(service);
+    }
+
+    private boolean areServicesAllowedByConfig(String dirKey) {
+        if(!dirKey.contains("/"))
+            return false;
+        dirKey = dirKey.split("/")[1];
+        return dirKey.contains("=") && dirKey.split("=")[0].equals(EtcdBungee.getInstance().getConfiguration().getString("service-filter", "GAME"));
     }
 
     private void updateBungee() {
