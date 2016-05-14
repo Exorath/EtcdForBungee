@@ -34,7 +34,7 @@ public class ServiceRequestHandlerImpl implements ServiceRequestHandler {
     }
 
     public String getHost() {
-        return EtcdBungee.getInstance().getConfiguration().getString("host", "localhost");
+        return EtcdBungee.getInstance().getConfiguration().getString("host", "etcd");
     }
 
     public int getPort() {

@@ -46,6 +46,7 @@ public class ServiceResponseHandlerImpl implements ServiceResponseHandler {
 
     private void handleServiceNode(JsonObject node) {
         MCService service = MCService.getService(node.get("key").getAsString(), node.get("value").getAsString());
+        System.out.println("Created service: " + service);
         if (service != null)
             services.add(service);
     }
@@ -62,6 +63,7 @@ public class ServiceResponseHandlerImpl implements ServiceResponseHandler {
         EtcdBungee.getInstance().getRegistry().clearServices();
         for (MCService service : services) {
             try {
+                System.out.println("Adding service: NAME:" + service.getName() + " ADDRESS:" + service.getAddress());
                 ServerInfo info = ProxyServer.getInstance().constructServerInfo(service.getName(), service.getAddress(), "", false);
                 service.setServerInfo(info);
                 ProxyServer.getInstance().getServers().put(info.getName(), info);
